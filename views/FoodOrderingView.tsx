@@ -6,6 +6,19 @@ import { Utensils, ShoppingBag, ArrowLeft, Check, Ticket, Minus, Plus } from 'lu
 
 type Step = 'SELECT_OUTLET' | 'ORDERING' | 'REVIEW' | 'CONFIRMATION';
 
+const listVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1, 
+    transition: { staggerChildren: 0.08 } 
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 }
+};
+
 export const FoodOrderingView: React.FC = () => {
   const [step, setStep] = useState<Step>('SELECT_OUTLET');
   const [selectedOutlet, setSelectedOutlet] = useState<FoodOutlet | null>(null);
@@ -86,10 +99,12 @@ export const FoodOrderingView: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               {FOOD_OUTLETS.map(outlet => (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   key={outlet.id}
                   onClick={() => handleSelectOutlet(outlet)}
-                  className="group relative p-8 h-64 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 hover:border-brand-accent/50 rounded-xl text-left transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm dark:shadow-none"
+                  className="group relative p-8 h-64 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 hover:border-brand-accent/50 rounded-xl text-left transition-colors duration-300 flex flex-col justify-between overflow-hidden shadow-sm dark:shadow-none"
                 >
                   <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <Utensils className="w-24 h-24 text-neutral-900 dark:text-brand-light" />
@@ -102,7 +117,7 @@ export const FoodOrderingView: React.FC = () => {
                     <span>View Menu</span>
                     <ShoppingBag className="w-4 h-4 ml-2" />
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
           </motion.div>
@@ -119,17 +134,26 @@ export const FoodOrderingView: React.FC = () => {
           >
             <button 
               onClick={() => setStep('SELECT_OUTLET')}
-              className="flex items-center text-neutral-500 hover:text-neutral-800 dark:text-neutral-500 dark:hover:text-neutral-300 text-sm mb-8 transition-colors"
+              className="group flex items-center text-neutral-500 hover:text-neutral-800 dark:text-neutral-500 dark:hover:text-neutral-300 text-sm mb-8 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Outlets
+              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Outlets
             </button>
 
             <h2 className="text-3xl font-serif text-neutral-900 dark:text-brand-light mb-2 transition-colors">{selectedOutlet.name}</h2>
             <p className="text-neutral-500 mb-10 transition-colors">{selectedOutlet.description}</p>
 
-            <div className="space-y-6 mb-12">
+            <motion.div 
+              variants={listVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6 mb-12"
+            >
               {selectedOutlet.items.map(item => (
-                <div key={item.id} className="flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-lg border border-neutral-200 dark:border-white/10 transition-colors">
+                <motion.div 
+                  key={item.id} 
+                  variants={itemVariants}
+                  className="flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-lg border border-neutral-200 dark:border-white/10 transition-colors"
+                >
                   <div className="flex-1 pr-4">
                     <div className="flex items-baseline gap-3">
                         <h4 className="text-lg text-neutral-900 dark:text-brand-light">{item.name}</h4>
@@ -138,38 +162,44 @@ export const FoodOrderingView: React.FC = () => {
                     <p className="text-neutral-600 dark:text-neutral-500 text-sm">{item.description}</p>
                   </div>
                   <div className="flex items-center gap-4 bg-neutral-100 dark:bg-[#141414] rounded-full px-3 py-1 border border-neutral-200 dark:border-white/10 transition-colors">
-                    <button 
+                    <motion.button 
+                      whileTap={{ scale: 0.8 }}
                       onClick={() => removeFromCart(item.id)}
                       className={`p-1 rounded-full transition-colors ${getQuantity(item.id) > 0 ? 'text-neutral-900 dark:text-brand-light hover:text-brand-accent' : 'text-neutral-400 dark:text-neutral-700'}`}
                       disabled={getQuantity(item.id) === 0}
                     >
                       <Minus className="w-4 h-4" />
-                    </button>
+                    </motion.button>
                     <span className="w-4 text-center text-neutral-900 dark:text-brand-light font-mono text-sm">{getQuantity(item.id)}</span>
-                    <button 
+                    <motion.button 
+                      whileTap={{ scale: 0.8 }}
                       onClick={() => addToCart(item.id)}
                       className="p-1 text-neutral-900 dark:text-brand-light hover:text-brand-accent transition-colors"
                     >
                       <Plus className="w-4 h-4" />
-                    </button>
+                    </motion.button>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             <div className="fixed bottom-24 left-0 w-full px-6 flex justify-center pointer-events-none">
-                <button
-                    disabled={totalItems === 0}
-                    onClick={() => setStep('REVIEW')}
-                    className={`pointer-events-auto shadow-2xl px-8 py-4 rounded-full font-medium flex items-center gap-3 transition-all transform ${
-                        totalItems > 0 
-                        ? 'bg-brand-accent text-[#141414] translate-y-0 opacity-100 hover:bg-brand-accent/90' 
-                        : 'bg-neutral-800 text-neutral-500 translate-y-10 opacity-0'
-                    }`}
-                >
-                    <ShoppingBag className="w-5 h-5" />
-                    <span>Review Order ({totalItems})</span>
-                </button>
+                <AnimatePresence>
+                  {totalItems > 0 && (
+                    <motion.button
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: 20, opacity: 0 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setStep('REVIEW')}
+                      className="pointer-events-auto shadow-2xl px-8 py-4 rounded-full font-medium flex items-center gap-3 bg-brand-accent text-[#141414] hover:bg-brand-accent/90 transition-colors"
+                    >
+                      <ShoppingBag className="w-5 h-5" />
+                      <span>Review Order ({totalItems})</span>
+                    </motion.button>
+                  )}
+                </AnimatePresence>
             </div>
           </motion.div>
         )}
@@ -185,9 +215,9 @@ export const FoodOrderingView: React.FC = () => {
           >
              <button 
               onClick={() => setStep('ORDERING')}
-              className="flex items-center text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 text-xs uppercase tracking-widest mb-6 transition-colors"
+              className="group flex items-center text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300 text-xs uppercase tracking-widest mb-6 transition-colors"
             >
-              <ArrowLeft className="w-3 h-3 mr-2" /> Modify
+              <ArrowLeft className="w-3 h-3 mr-2 group-hover:-translate-x-1 transition-transform" /> Modify
             </button>
 
             <h3 className="text-2xl font-serif text-neutral-900 dark:text-brand-light mb-6 transition-colors">Confirm Order</h3>
@@ -212,7 +242,9 @@ export const FoodOrderingView: React.FC = () => {
                 />
             </div>
 
-            <button
+            <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={submitOrder}
                 disabled={!teamName.trim()}
                 className={`w-full py-4 rounded-lg font-medium transition-all flex justify-center items-center gap-2 ${
@@ -223,7 +255,7 @@ export const FoodOrderingView: React.FC = () => {
             >
                 <span>Place Order</span>
                 <Check className="w-4 h-4" />
-            </button>
+            </motion.button>
           </motion.div>
         )}
 
@@ -235,7 +267,12 @@ export const FoodOrderingView: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-md mx-auto text-center"
             >
-                <div className="bg-[#FAFAFA] text-[#141414] p-8 rounded-sm shadow-xl mx-auto relative overflow-hidden">
+                <motion.div 
+                    initial={{ rotateX: 90 }}
+                    animate={{ rotateX: 0 }}
+                    transition={{ type: 'spring', damping: 20 }}
+                    className="bg-[#FAFAFA] text-[#141414] p-8 rounded-sm shadow-xl mx-auto relative overflow-hidden"
+                >
                     <div className="border-b-2 border-dashed border-neutral-300 pb-6 mb-6">
                         <div className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-2">Order Confirmed</div>
                         <h2 className="text-3xl font-serif font-bold text-[#141414]">{selectedOutlet?.name}</h2>
@@ -262,14 +299,16 @@ export const FoodOrderingView: React.FC = () => {
 
                     {/* Ticket serrated edge effect */}
                     <div className="absolute bottom-0 left-0 w-full h-2 bg-brand-light dark:bg-brand-dark transition-colors duration-500" style={{clipPath: 'polygon(0% 0%, 5% 100%, 10% 0%, 15% 100%, 20% 0%, 25% 100%, 30% 0%, 35% 100%, 40% 0%, 45% 100%, 50% 0%, 55% 100%, 60% 0%, 65% 100%, 70% 0%, 75% 100%, 80% 0%, 85% 100%, 90% 0%, 95% 100%, 100% 0%)'}}></div>
-                </div>
+                </motion.div>
 
-                <button 
+                <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={resetFlow}
                     className="mt-12 text-neutral-500 dark:text-neutral-600 hover:text-neutral-800 dark:hover:text-neutral-400 text-sm transition-colors"
                 >
                     Order for another team?
-                </button>
+                </motion.button>
             </motion.div>
         )}
 

@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { ViewState } from '../types';
-import { Moon, Sun, Menu, X, Sparkles } from 'lucide-react';
+import { Menu, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavigationProps {
   currentView: ViewState;
   setView: (view: ViewState) => void;
-  isDark: boolean;
-  toggleTheme: () => void;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, isDark, toggleTheme }) => {
+export const Navigation: React.FC<NavigationProps> = ({ currentView, setView }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems: { id: ViewState; label: string }[] = [
@@ -36,39 +34,40 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, is
             className="flex items-center gap-3 cursor-pointer group" 
             onClick={() => handleNavClick('LANDING')}
           >
-             <div className="p-2 bg-neutral-100 dark:bg-neutral-900 rounded-full border border-neutral-200 dark:border-white/10 group-hover:border-brand-accent/50 transition-colors">
+             <motion.div 
+               whileHover={{ rotate: 180 }}
+               transition={{ duration: 0.6, ease: "easeOut" }}
+               className="p-2 bg-neutral-100 dark:bg-neutral-900 rounded-full border border-neutral-200 dark:border-white/10 group-hover:border-brand-accent/50 transition-colors"
+             >
                 <Sparkles className="w-4 h-4 text-brand-accent" />
-             </div>
+             </motion.div>
              <h1 className="text-xl font-serif text-neutral-900 dark:text-brand-light tracking-wide transition-colors">BuildFest</h1>
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`text-sm tracking-wide transition-all duration-300 ${
+                className="relative px-4 py-2 text-sm tracking-wide transition-colors duration-300"
+              >
+                {currentView === item.id && (
+                  <motion.div
+                    layoutId="active-pill"
+                    className="absolute inset-0 bg-neutral-100 dark:bg-white/10 rounded-full"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className={`relative z-10 ${
                   currentView === item.id
                     ? 'text-brand-accent font-medium'
                     : 'text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-300'
-                }`}
-              >
-                {item.label}
+                }`}>
+                  {item.label}
+                </span>
               </button>
             ))}
-             
-             {/* Divider */}
-             <div className="h-4 w-px bg-neutral-200 dark:bg-white/10"></div>
-
-             {/* Theme Toggle */}
-             <button
-               onClick={toggleTheme}
-               className="p-2 text-neutral-500 hover:text-brand-accent dark:text-neutral-400 dark:hover:text-brand-light transition-colors"
-               aria-label="Toggle Theme"
-             >
-               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-             </button>
 
              <div className="text-xs font-mono text-neutral-400 dark:text-neutral-600 uppercase tracking-widest pl-4">
                 Est. 2026
@@ -77,12 +76,6 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, is
 
           {/* Mobile Actions */}
           <div className="md:hidden flex items-center gap-4">
-            <button
-               onClick={toggleTheme}
-               className="p-2 text-neutral-500 dark:text-neutral-400"
-             >
-               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-             </button>
             <button 
               className="text-neutral-900 dark:text-neutral-400 hover:text-brand-accent p-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -97,32 +90,40 @@ export const Navigation: React.FC<NavigationProps> = ({ currentView, setView, is
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-brand-light dark:bg-brand-dark pt-24 px-6 md:hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: '100vh' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-40 bg-brand-light dark:bg-brand-dark pt-24 px-6 md:hidden overflow-hidden"
           >
-            <div className="flex flex-col space-y-8">
-              {navItems.map((item) => (
-                <button
+            <div className="flex flex-col space-y-6">
+              {navItems.map((item, i) => (
+                <motion.button
                   key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
                   onClick={() => handleNavClick(item.id)}
-                  className={`text-3xl font-serif text-left ${
+                  className={`text-4xl font-serif text-left ${
                     currentView === item.id
                       ? 'text-brand-accent'
                       : 'text-neutral-400 dark:text-neutral-500'
                   }`}
                 >
                   {item.label}
-                </button>
+                </motion.button>
               ))}
             </div>
-            <div className="mt-12 pt-8 border-t border-neutral-200 dark:border-neutral-900">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              transition={{ delay: 0.3 }}
+              className="mt-12 pt-8 border-t border-neutral-200 dark:border-neutral-900"
+            >
                 <p className="text-neutral-500 dark:text-neutral-600 font-mono text-sm uppercase tracking-widest">
                     Vibe First. Code Later.
                 </p>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
