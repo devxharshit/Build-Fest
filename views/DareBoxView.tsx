@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DARES } from '../constants';
 import { Dare, LockedDare } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Unlock, Shuffle, Eye } from 'lucide-react';
+import { Lock, Shuffle, Eye, AlertTriangle } from 'lucide-react';
 
 export const DareBoxView: React.FC = () => {
   const [currentDare, setCurrentDare] = useState<Dare | null>(null);
@@ -21,8 +21,6 @@ export const DareBoxView: React.FC = () => {
   const revealDare = () => {
     setLoading(true);
     setIsRevealed(false);
-    
-    // Simulate a "shuffling" delay for effect
     setTimeout(() => {
       const random = DARES[Math.floor(Math.random() * DARES.length)];
       setCurrentDare(random);
@@ -33,131 +31,135 @@ export const DareBoxView: React.FC = () => {
 
   const lockDare = () => {
     if (!currentDare || !teamName.trim()) return;
-    
     const locked: LockedDare = {
       dareId: currentDare.id,
       dareText: currentDare.text,
       teamName: teamName,
       timestamp: Date.now()
     };
-    
-    // "Quietly store in background" simulation
-    console.log('Sending to server...', locked);
     localStorage.setItem('buildfest_locked_dare', JSON.stringify(locked));
     setLockedDare(locked);
   };
 
   return (
-    <div className="max-w-3xl mx-auto pt-20 pb-40 px-6 min-h-[70vh] flex flex-col items-center justify-center">
+    <div className="max-w-4xl mx-auto pt-16 pb-40 px-6 min-h-[80vh] flex flex-col items-center justify-center">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         className="w-full"
       >
-        <header className="mb-12 text-center">
-          <h2 className="text-4xl md:text-5xl text-neutral-900 dark:text-brand-light mb-4 font-serif transition-colors">The Dare Box</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-lg font-light transition-colors">
-            Optional. Dangerous. Irreversible (sort of).
+        <header className="mb-16 text-center">
+          <h2 className="text-5xl md:text-6xl text-neutral-900 dark:text-brand-light mb-4 font-serif">The Dare Box</h2>
+          <p className="text-neutral-500 dark:text-neutral-400 text-lg font-light flex items-center justify-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-brand-accent" />
+            <span>Optional. Dangerous. Irreversible.</span>
           </p>
         </header>
 
-        {lockedDare ? (
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white dark:bg-white/5 border border-brand-accent/30 p-10 rounded-lg text-center shadow-2xl shadow-brand-accent/10 transition-colors"
-          >
-            <Lock className="w-8 h-8 text-brand-accent mx-auto mb-6" />
-            <h3 className="text-neutral-500 dark:text-neutral-300 font-mono text-sm uppercase tracking-widest mb-4">Dare Locked for {lockedDare.teamName}</h3>
-            <p className="text-2xl md:text-3xl text-neutral-900 dark:text-brand-light font-serif leading-tight">
-              {lockedDare.dareText}
-            </p>
-            <div className="mt-8 text-neutral-400 dark:text-neutral-600 text-xs">
-              Locked on {new Date(lockedDare.timestamp).toLocaleTimeString()}
-            </div>
-          </motion.div>
-        ) : (
-          <div className="flex flex-col items-center space-y-12">
-            
-            <AnimatePresence mode="wait">
-              {loading ? (
-                <motion.div
-                  key="loader"
-                  initial={{ opacity: 0, rotate: -180, scale: 0.5 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  className="h-48 flex items-center justify-center text-brand-accent"
-                >
-                  <Shuffle className="w-10 h-10 animate-spin opacity-50" />
-                </motion.div>
-              ) : isRevealed && currentDare ? (
-                <motion.div
-                  key="result"
-                  initial={{ rotateY: 90, opacity: 0 }}
-                  animate={{ rotateY: 0, opacity: 1 }}
-                  transition={{ type: 'spring', damping: 15 }}
-                  className="text-center max-w-xl perspective-1000"
-                >
-                  <div className="mb-4 inline-block px-3 py-1 bg-neutral-100 dark:bg-neutral-900 rounded-full border border-neutral-200 dark:border-white/10 text-xs text-neutral-500 uppercase tracking-widest transition-colors">
-                    Intensity: {currentDare.intensity}
-                  </div>
-                  <p className="text-2xl md:text-3xl text-neutral-900 dark:text-brand-light font-serif leading-relaxed mb-10 transition-colors">
-                    {currentDare.text}
-                  </p>
-                  
-                  <div className="flex flex-col items-center space-y-4">
-                     <input
-                      type="text"
-                      placeholder="Enter Team Name to Lock"
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      className="bg-transparent border-b border-neutral-300 dark:border-neutral-700 text-center text-neutral-900 dark:text-neutral-300 py-2 px-4 focus:outline-none focus:border-brand-accent transition-colors placeholder-neutral-400 dark:placeholder-neutral-700"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={lockDare}
-                      disabled={!teamName.trim()}
-                      className={`flex items-center space-x-2 px-6 py-3 rounded-full transition-all ${
-                        teamName.trim() 
-                          ? 'bg-brand-accent/20 text-brand-accent hover:bg-brand-accent/40 hover:text-brand-light border border-brand-accent/50' 
-                          : 'bg-transparent text-neutral-400 dark:text-neutral-700 cursor-not-allowed'
-                      }`}
-                    >
-                      <Lock className="w-4 h-4" />
-                      <span>Accept This Dare</span>
-                    </motion.button>
+        <div className="flex justify-center">
+          {lockedDare ? (
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="glass-panel p-12 max-w-2xl w-full text-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-brand-accent"></div>
+              <Lock className="w-10 h-10 text-brand-accent mx-auto mb-8" />
+              
+              <div className="mb-8">
+                <h3 className="text-neutral-500 dark:text-neutral-400 font-mono text-xs uppercase tracking-[0.2em] mb-4">
+                  Locked for Team <span className="text-brand-accent">{lockedDare.teamName}</span>
+                </h3>
+                <p className="text-3xl md:text-4xl text-neutral-900 dark:text-brand-light font-serif leading-tight">
+                  {lockedDare.dareText}
+                </p>
+              </div>
+
+              <div className="inline-block px-4 py-2 rounded bg-neutral-100 dark:bg-white/5 text-neutral-400 dark:text-neutral-500 text-[10px] font-mono uppercase tracking-widest">
+                Timestamp: {new Date(lockedDare.timestamp).toLocaleTimeString()}
+              </div>
+            </motion.div>
+          ) : (
+            <div className="w-full max-w-xl">
+              <AnimatePresence mode="wait">
+                {loading ? (
+                  <motion.div
+                    key="loader"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="glass-panel h-80 flex flex-col items-center justify-center text-brand-accent"
+                  >
+                    <Shuffle className="w-12 h-12 animate-spin mb-4" />
+                    <span className="font-mono text-xs uppercase tracking-widest animate-pulse">Shuffling Fate...</span>
+                  </motion.div>
+                ) : isRevealed && currentDare ? (
+                  <motion.div
+                    key="result"
+                    initial={{ rotateX: 90, opacity: 0 }}
+                    animate={{ rotateX: 0, opacity: 1 }}
+                    transition={{ type: 'spring', damping: 20 }}
+                    className="glass-panel p-10 text-center"
+                  >
+                    <div className="mb-6 flex justify-center">
+                       <span className={`px-3 py-1 rounded text-[10px] font-mono uppercase tracking-widest border ${
+                         currentDare.intensity === 'High' 
+                           ? 'border-red-500/50 text-red-500 bg-red-500/10' 
+                           : 'border-brand-accent/50 text-brand-accent bg-brand-accent/10'
+                       }`}>
+                         Intensity: {currentDare.intensity}
+                       </span>
+                    </div>
+
+                    <p className="text-2xl md:text-3xl text-neutral-900 dark:text-brand-light font-serif leading-relaxed mb-10">
+                      {currentDare.text}
+                    </p>
                     
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={revealDare}
-                      className="text-neutral-500 hover:text-neutral-800 dark:text-neutral-600 dark:hover:text-neutral-400 mt-4 transition-colors text-sm"
-                    >
-                      Draw again
-                    </motion.button>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.button
-                  key="trigger"
-                  whileHover={{ scale: 1.05, rotate: 1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={revealDare}
-                  className="group relative w-64 h-64 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-brand-accent/50 transition-colors shadow-sm dark:shadow-none"
-                >
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-tr from-brand-accent/5 to-transparent rounded-2xl"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                  />
-                  <Eye className="w-12 h-12 text-neutral-400 dark:text-neutral-700 group-hover:text-brand-accent transition-colors mb-4" />
-                  <span className="text-neutral-400 dark:text-neutral-500 font-mono text-sm tracking-widest group-hover:text-neutral-800 dark:group-hover:text-neutral-300 transition-colors">REVEAL DARE</span>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
+                    <div className="space-y-6 pt-6 border-t border-neutral-200 dark:border-white/10">
+                       <input
+                        type="text"
+                        placeholder="Enter Team Name to Lock"
+                        value={teamName}
+                        onChange={(e) => setTeamName(e.target.value)}
+                        className="input-minimal text-center text-xl"
+                      />
+                      
+                      <button
+                        onClick={lockDare}
+                        disabled={!teamName.trim()}
+                        className="btn-primary w-full flex items-center justify-center gap-2"
+                      >
+                        <Lock className="w-4 h-4" />
+                        <span>Accept This Dare</span>
+                      </button>
+                      
+                      <button
+                        onClick={revealDare}
+                        className="btn-ghost text-sm w-full py-2"
+                      >
+                        Draw again
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key="trigger"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={revealDare}
+                    className="glass-panel glass-panel-hover w-full h-80 flex flex-col items-center justify-center group"
+                  >
+                    <div className="p-6 rounded-full bg-neutral-100 dark:bg-white/5 mb-6 group-hover:scale-110 transition-transform duration-300">
+                       <Eye className="w-10 h-10 text-neutral-400 dark:text-neutral-500 group-hover:text-brand-accent transition-colors" />
+                    </div>
+                    <span className="text-neutral-900 dark:text-brand-light text-xl font-serif mb-2">Reveal a Dare</span>
+                    <span className="text-neutral-400 dark:text-neutral-600 font-mono text-xs uppercase tracking-widest">Click to randomize</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
       </motion.div>
     </div>
   );

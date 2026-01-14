@@ -13,52 +13,58 @@ const container: Variants = {
 };
 
 const item: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
 };
 
 export const PromptsView: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto pt-20 pb-40 px-6">
+    <div className="max-w-5xl mx-auto pt-16 pb-40 px-6">
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
       >
-        <motion.header variants={item} className="mb-20 text-center">
-          <h2 className="text-4xl md:text-5xl text-neutral-900 dark:text-brand-light mb-4 font-serif transition-colors">The Prompts</h2>
-          <p className="text-neutral-500 dark:text-neutral-400 text-lg md:text-xl font-light max-w-2xl mx-auto transition-colors">
+        <motion.header variants={item} className="mb-20 text-center relative z-10">
+          <h2 className="text-5xl md:text-6xl text-neutral-900 dark:text-brand-light mb-6 font-serif">The Prompts</h2>
+          <p className="text-neutral-500 dark:text-neutral-400 text-lg md:text-xl font-light max-w-2xl mx-auto leading-relaxed">
             Choose one. Interpret it loosely. Define your own constraints.
           </p>
         </motion.header>
 
-        <div className="space-y-24">
+        <div className="grid gap-8">
           {PROMPTS.map((prompt, index) => (
             <motion.div 
               key={prompt.id} 
               variants={item}
-              className="relative"
+              className="glass-panel glass-panel-hover p-8 md:p-12 group cursor-default relative overflow-hidden"
             >
-              {/* Heading Container - Hover Effect Isolated Here */}
-              <div className="group cursor-pointer mb-6">
-                <div className="flex flex-col md:flex-row md:items-baseline gap-4">
-                  <span className="text-brand-accent/50 font-mono text-sm tracking-widest group-hover:text-brand-accent transition-colors duration-300">
-                    {(index + 1).toString().padStart(2, '0')}
-                  </span>
-                  <h3 className="text-3xl md:text-4xl text-neutral-800 dark:text-brand-light font-serif group-hover:text-brand-accent transition-colors duration-300">
-                    {prompt.title}
-                  </h3>
-                  <span className="text-neutral-500 dark:text-neutral-600 font-mono text-xs uppercase tracking-wider md:ml-auto transition-colors group-hover:text-neutral-400">
-                    {prompt.theme}
+              {/* Decorative Number Background */}
+              <div className="absolute -right-4 -top-8 text-[12rem] font-serif opacity-[0.03] dark:opacity-[0.02] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+                {index + 1}
+              </div>
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-start gap-6 md:gap-10">
+                <div className="flex-shrink-0 pt-2">
+                  <span className="font-mono text-xs uppercase tracking-widest text-brand-accent border border-brand-accent/30 px-2 py-1 rounded bg-brand-accent/5">
+                    Prompt {(index + 1).toString().padStart(2, '0')}
                   </span>
                 </div>
-              </div>
-              
-              {/* Paragraph Container */}
-              <div className="pl-0 md:pl-10">
-                 <p className="text-neutral-600 dark:text-neutral-400 text-lg md:text-xl leading-relaxed whitespace-pre-line transition-colors">
-                  {prompt.body}
-                </p>
+                
+                <div className="flex-grow">
+                  <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-4 mb-6 border-b border-neutral-200 dark:border-white/5 pb-6">
+                    <h3 className="text-3xl md:text-4xl text-neutral-800 dark:text-brand-light font-serif group-hover:text-brand-accent transition-colors duration-300">
+                      {prompt.title}
+                    </h3>
+                    <span className="text-neutral-400 dark:text-neutral-500 font-mono text-xs uppercase tracking-wider">
+                      Theme: {prompt.theme}
+                    </span>
+                  </div>
+                  
+                  <p className="text-neutral-600 dark:text-neutral-300 text-lg leading-relaxed whitespace-pre-line max-w-3xl">
+                    {prompt.body}
+                  </p>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -66,9 +72,11 @@ export const PromptsView: React.FC = () => {
         
         <motion.div 
           variants={item}
-          className="mt-32 text-center text-neutral-400 dark:text-neutral-600 text-sm transition-colors"
+          className="mt-24 text-center"
         >
-           End of list. Begin anywhere.
+          <div className="inline-block px-4 py-2 rounded-full bg-neutral-100 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 text-xs font-mono tracking-widest">
+            End of List • Begin Anywhere
+          </div>
         </motion.div>
       </motion.div>
     </div>
